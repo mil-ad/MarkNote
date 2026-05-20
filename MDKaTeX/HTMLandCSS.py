@@ -22,10 +22,10 @@ HTMLforEditor = """
 
 			document.body.appendChild(area);
 		}
-        
+
         else {
 			var fields = document.getElementsByClassName('fields')[0];
-        
+
 			keyupFunc = function() {
 				var text = '# Field 1\\n' + fields.children[0].getElementsByClassName("rich-text-editable")[0].shadowRoot.children[2].innerHTML;
 				text += "\\n# Field 2\\n" + fields.children[1].getElementsByClassName("rich-text-editable")[0].shadowRoot.children[2].innerHTML;
@@ -38,13 +38,13 @@ HTMLforEditor = """
 
         var getResources = [
 					getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"),
+					getCSS("_texmath.min.css", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/css/texmath.min.css"),
 					getCSS("_highlight.css", "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/styles/default.min.css"),
 					getScript("_highlight.js", "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/highlight.min.js"),
 					getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"),
-					getScript("_auto-render.js", "https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/auto-render-cdn.js"),
 					getScript("_markdown-it.min.js", "https://cdnjs.cloudflare.com/ajax/libs/markdown-it/12.0.4/markdown-it.min.js"),
-                                        getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/_markdown-it-mark.js")
-					
+					getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/_markdown-it-mark.js"),
+					getScript("_texmath.min.js", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/texmath.min.js")
 				];
 
 				main = function() {
@@ -53,7 +53,7 @@ HTMLforEditor = """
 				}
 
                                 Promise.all(getResources).then(() => getScript("_mhchem.js", "https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/mhchem.min.js")).then(main);
-				
+
 
 				function getScript(path, altURL) {
 					return new Promise((resolve, reject) => {
@@ -92,7 +92,6 @@ HTMLforEditor = """
 				}
 
 				function render(text) {
-					renderMath(text);
 					markdown(text);
 					show();
 				}
@@ -101,19 +100,8 @@ HTMLforEditor = """
 					area.style.visibility = "visible";
 				}
 
-
-				function renderMath(text) {
+				function markdown(text) {
 					text = replaceInString(text);
-					area.textContent = text;
-					renderMathInElement(area, {
-						delimiters:  [
-								{left: "$$", right: "$$", display: true},
-								{left: "$", right: "$", display: false}
-						],
-															throwOnError : false
-					});
-				}
-				function markdown() {
 					let md = new markdownit({typographer: true, html:true, highlight: function (str, lang) {
 																	if (lang && hljs.getLanguage(lang)) {
 																			try {
@@ -122,11 +110,12 @@ HTMLforEditor = """
 																	}
 
 																	return ''; // use external default escaping
-															}}).use(markdownItMark);
-					text = replaceHTMLElementsInString(area.innerHTML);
-					text = md.render(text);
-					area.innerHTML = text.replace(/&lt;\/span&gt;/gi,"\\\\");
+															}})
+								.use(markdownItMark)
+								.use(texmath, { engine: katex, delimiters: 'dollars', katexOptions: { throwOnError: false } });
+					area.innerHTML = md.render(text);
 				}
+
 				function replaceInString(str) {
 					str = str.replace(/<[\/]?pre[^>]*>/gi, "");
 					str = str.replace(/<br\s*[\/]?[^>]*>/gi, "\\n");
@@ -153,15 +142,16 @@ front = """
 <script>
 	var getResources = [
 		getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"),
+		getCSS("_texmath.min.css", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/css/texmath.min.css"),
 		getCSS("_highlight.css", "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/styles/default.min.css"),
 		getScript("_highlight.js", "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/highlight.min.js"),
 		getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"),
-		getScript("_auto-render.js", "https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/auto-render-cdn.js"),
 		getScript("_markdown-it.min.js", "https://cdnjs.cloudflare.com/ajax/libs/markdown-it/12.0.4/markdown-it.min.js"),
-                getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/_markdown-it-mark.js")
+		getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/_markdown-it-mark.js"),
+		getScript("_texmath.min.js", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/texmath.min.js")
 	];
         Promise.all(getResources).then(() => getScript("_mhchem.js", "https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/mhchem.min.js")).then(render).catch(show);
-	
+
 
 	function getScript(path, altURL) {
 		return new Promise((resolve, reject) => {
@@ -201,7 +191,6 @@ front = """
 
 
 	function render() {
-		renderMath("front");
 		markdown("front");
 		show();
 	}
@@ -210,20 +199,9 @@ front = """
 		document.getElementById("front").style.visibility = "visible";
 	}
 
-	function renderMath(ID) {
-		let text = document.getElementById(ID).innerHTML;
-		text = replaceInString(text);
-		document.getElementById(ID).textContent = text;
-		renderMathInElement(document.getElementById(ID), {
-			delimiters:  [
-  				{left: "$$", right: "$$", display: true},
-  				{left: "$", right: "$", display: false}
-			],
-            throwOnError : false
-		});
-	}
-
 	function markdown(ID) {
+		let el = document.getElementById(ID);
+		let text = replaceInString(el.innerHTML);
 		let md = new markdownit({typographer: true, html:true, highlight: function (str, lang) {
                             if (lang && hljs.getLanguage(lang)) {
                                 try {
@@ -232,11 +210,12 @@ front = """
                             }
 
                             return ''; // use external default escaping
-                        }}).use(markdownItMark);
-		let text = replaceHTMLElementsInString(document.getElementById(ID).innerHTML);
-		text = md.render(text);
-		document.getElementById(ID).innerHTML = text.replace(/&lt;\/span&gt;/gi,"\\\\");
+                        }})
+				.use(markdownItMark)
+				.use(texmath, { engine: katex, delimiters: 'dollars', katexOptions: { throwOnError: false } });
+		el.innerHTML = md.render(text);
 	}
+
 	function replaceInString(str) {
 		str = str.replace(/<[\/]?pre[^>]*>/gi, "");
 		str = str.replace(/<br\s*[\/]?[^>]*>/gi, "\\n");
@@ -268,15 +247,16 @@ back = """
 <script>
 	var getResources = [
 		getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"),
+		getCSS("_texmath.min.css", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/css/texmath.min.css"),
 		getCSS("_highlight.css", "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/styles/default.min.css"),
 		getScript("_highlight.js", "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/highlight.min.js"),
 		getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"),
-		getScript("_auto-render.js", "https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/auto-render-cdn.js"),
 		getScript("_markdown-it.min.js", "https://cdnjs.cloudflare.com/ajax/libs/markdown-it/12.0.4/markdown-it.min.js"),
-		getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/_markdown-it-mark.js")
+		getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/_markdown-it-mark.js"),
+		getScript("_texmath.min.js", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/texmath.min.js")
 	];
         Promise.all(getResources).then(() => getScript("_mhchem.js", "https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/mhchem.min.js")).then(render).catch(show);
-	
+
 
 	function getScript(path, altURL) {
 		return new Promise((resolve, reject) => {
@@ -315,9 +295,7 @@ back = """
 	}
 
 	function render() {
-		renderMath("front");
 		markdown("front");
-		renderMath("back");
 		markdown("back");
 		show();
 	}
@@ -327,20 +305,9 @@ back = """
 		document.getElementById("back").style.visibility = "visible";
 	}
 
-
-	function renderMath(ID) {
-		let text = document.getElementById(ID).innerHTML;
-		text = replaceInString(text);
-		document.getElementById(ID).textContent = text;
-		renderMathInElement(document.getElementById(ID), {
-			delimiters:  [
-  				{left: "$$", right: "$$", display: true},
-  				{left: "$", right: "$", display: false}
-			],
-                        throwOnError : false
-		});
-	}
 	function markdown(ID) {
+		let el = document.getElementById(ID);
+		let text = replaceInString(el.innerHTML);
 		let md = new markdownit({typographer: true, html:true, highlight: function (str, lang) {
                             if (lang && hljs.getLanguage(lang)) {
                                 try {
@@ -349,11 +316,12 @@ back = """
                             }
 
                             return ''; // use external default escaping
-                        }}).use(markdownItMark);
-		let text = replaceHTMLElementsInString(document.getElementById(ID).innerHTML);
-		text = md.render(text);
-		document.getElementById(ID).innerHTML = text.replace(/&lt;\/span&gt;/gi,"\\\\");
+                        }})
+				.use(markdownItMark)
+				.use(texmath, { engine: katex, delimiters: 'dollars', katexOptions: { throwOnError: false } });
+		el.innerHTML = md.render(text);
 	}
+
 	function replaceInString(str) {
 		str = str.replace(/<[\/]?pre[^>]*>/gi, "");
 		str = str.replace(/<br\s*[\/]?[^>]*>/gi, "\\n");
@@ -381,15 +349,16 @@ front_cloze = """
 <script>
 	var getResources = [
 		getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"),
+		getCSS("_texmath.min.css", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/css/texmath.min.css"),
 		getCSS("_highlight.css", "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/styles/default.min.css"),
 		getScript("_highlight.js", "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/highlight.min.js"),
 		getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"),
-		getScript("_auto-render.js", "https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/auto-render-cdn.js"),
 		getScript("_markdown-it.min.js", "https://cdnjs.cloudflare.com/ajax/libs/markdown-it/12.0.4/markdown-it.min.js"),
-		getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/_markdown-it-mark.js")
+		getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/_markdown-it-mark.js"),
+		getScript("_texmath.min.js", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/texmath.min.js")
 	];
         Promise.all(getResources).then(() => getScript("_mhchem.js", "https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/mhchem.min.js")).then(render).catch(show);
-	
+
 
 	function getScript(path, altURL) {
 		return new Promise((resolve, reject) => {
@@ -427,26 +396,15 @@ front_cloze = """
 		});
 	}
 	function render() {
-		renderMath("front");
 		markdown("front");
 		show();
 	}
 	function show() {
 		document.getElementById("front").style.visibility = "visible";
 	}
-	function renderMath(ID) {
-		let text = document.getElementById(ID).innerHTML;
-		text = replaceInString(text);
-		document.getElementById(ID).textContent = text;
-		renderMathInElement(document.getElementById(ID), {
-			delimiters:  [
-  				{left: "$$", right: "$$", display: true},
-  				{left: "$", right: "$", display: false}
-			],
-                        throwOnError : false
-		});
-	}
 	function markdown(ID) {
+		let el = document.getElementById(ID);
+		let text = replaceInString(el.innerHTML);
 		let md = new markdownit({typographer: true, html:true, highlight: function (str, lang) {
                             if (lang && hljs.getLanguage(lang)) {
                                 try {
@@ -455,10 +413,10 @@ front_cloze = """
                             }
 
                             return ''; // use external default escaping
-                        }}).use(markdownItMark);
-		let text = replaceHTMLElementsInString(document.getElementById(ID).innerHTML);
-		text = md.render(text);
-		document.getElementById(ID).innerHTML = text.replace(/&lt;\/span&gt;/gi,"\\\\");
+                        }})
+				.use(markdownItMark)
+				.use(texmath, { engine: katex, delimiters: 'dollars', katexOptions: { throwOnError: false } });
+		el.innerHTML = md.render(text);
 	}
 	function replaceInString(str) {
 		str = str.replace(/<[\/]?pre[^>]*>/gi, "");
@@ -488,15 +446,16 @@ back_cloze = """
 <script>
 	var getResources = [
 		getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"),
+		getCSS("_texmath.min.css", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/css/texmath.min.css"),
 		getCSS("_highlight.css", "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/styles/default.min.css"),
 		getScript("_highlight.js", "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/highlight.min.js"),
 		getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"),
-		getScript("_auto-render.js", "https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/auto-render-cdn.js"),
 		getScript("_markdown-it.min.js", "https://cdnjs.cloudflare.com/ajax/libs/markdown-it/12.0.4/markdown-it.min.js"),
-		getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/_markdown-it-mark.js")
+		getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/_markdown-it-mark.js"),
+		getScript("_texmath.min.js", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/texmath.min.js")
 	];
         Promise.all(getResources).then(() => getScript("_mhchem.js", "https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/mhchem.min.js")).then(render).catch(show);
-	
+
 
 	function getScript(path, altURL) {
 		return new Promise((resolve, reject) => {
@@ -536,10 +495,8 @@ back_cloze = """
 
 
 	function render() {
-		renderMath("back");
 		markdown("back");
-		renderMath("extra");
-		markdown("extra");	
+		markdown("extra");
 		show();
 	}
 
@@ -548,19 +505,9 @@ back_cloze = """
 		document.getElementById("extra").style.visibility = "visible";
 	}
 
-	function renderMath(ID) {
-		let text = document.getElementById(ID).innerHTML;
-		text = replaceInString(text);
-		document.getElementById(ID).textContent = text;
-		renderMathInElement(document.getElementById(ID), {
-			delimiters:  [
-  				{left: "$$", right: "$$", display: true},
-  				{left: "$", right: "$", display: false}
-			],
-                        throwOnError : false
-		});
-	}
 	function markdown(ID) {
+		let el = document.getElementById(ID);
+		let text = replaceInString(el.innerHTML);
 		let md = new markdownit({typographer: true, html:true, highlight: function (str, lang) {
                             if (lang && hljs.getLanguage(lang)) {
                                 try {
@@ -569,10 +516,10 @@ back_cloze = """
                             }
 
                             return ''; // use external default escaping
-                        }}).use(markdownItMark);
-		let text = replaceHTMLElementsInString(document.getElementById(ID).innerHTML);
-		text = md.render(text);
-		document.getElementById(ID).innerHTML = text.replace(/&lt;\/span&gt;/gi,"\\\\");
+                        }})
+				.use(markdownItMark)
+				.use(texmath, { engine: katex, delimiters: 'dollars', katexOptions: { throwOnError: false } });
+		el.innerHTML = md.render(text);
 	}
 	function replaceInString(str) {
 		str = str.replace(/<[\/]?pre[^>]*>/gi, "");

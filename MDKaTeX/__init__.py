@@ -6,8 +6,8 @@ from aqt import mw
 from anki.hooks import addHook
 import anki
 
-MODEL_NAME = 'KaTeX and Markdown'
-CONF_NAME = 'MDKATEX'
+MODEL_NAME = 'KaTeX and Markdown (mil)'
+CONF_NAME = 'MDKATEX_MIL'
 
 
 def markdownPreview(editor):
@@ -105,17 +105,16 @@ def update():
     model = mw.col.models.byName(MODEL_NAME + " Basic")
     model_cloze = mw.col.models.byName(MODEL_NAME + " Cloze")
 
-    # Commented out since I don't want to overwrite the user's individual changes right now
-    # model['tmpls'][0]['qfmt'] = front
-    # model['tmpls'][0]['afmt'] = back
-    # model['css'] = css
+    model['tmpls'][0]['qfmt'] = front
+    model['tmpls'][0]['afmt'] = back
+    model['css'] = css
 
-    # model_cloze['tmpls'][0]['qfmt'] = front_cloze
-    # model_cloze['tmpls'][0]['afmt'] = back_cloze
-    # model_cloze['css'] = css
+    model_cloze['tmpls'][0]['qfmt'] = front_cloze
+    model_cloze['tmpls'][0]['afmt'] = back_cloze
+    model_cloze['css'] = css
 
-    # mw.col.models.save(model)
-    # mw.col.models.save(model_cloze)
+    mw.col.models.save(model)
+    mw.col.models.save(model_cloze)
 
     if os.path.isdir(os.path.join(mw.col.media.dir(), "_katex")):
         shutil.rmtree(os.path.join(mw.col.media.dir(), "_katex"))
@@ -127,7 +126,6 @@ def update():
 
     _add_file(os.path.join(addon_path, "_katex.min.js"), "_katex.min.js")
     _add_file(os.path.join(addon_path, "_katex.css"), "_katex.css")
-    _add_file(os.path.join(addon_path, "_auto-render.js"), "_auto-render.js")
     _add_file(os.path.join(addon_path, "_markdown-it.min.js"),
               "_markdown-it.min.js")
     _add_file(os.path.join(addon_path, "_highlight.css"), "_highlight.css")
@@ -135,6 +133,8 @@ def update():
     _add_file(os.path.join(addon_path, "_mhchem.js"), "_mhchem.js")
     _add_file(os.path.join(addon_path, "_markdown-it-mark.js"),
               "_markdown-it-mark.js")
+    _add_file(os.path.join(addon_path, "_texmath.min.js"), "_texmath.min.js")
+    _add_file(os.path.join(addon_path, "_texmath.min.css"), "_texmath.min.css")
 
     for katex_font in os.listdir(os.path.join(addon_path, "fonts")):
         _add_file(os.path.join(addon_path, "fonts", katex_font), katex_font)

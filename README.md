@@ -1,5 +1,9 @@
-# Anki-KaTeX-Markdown
-Creates a new Basic and a new Cloze Note Type that support Markdown and KaTeX
+# Anki-KaTeX-Markdown (mil fork)
+Creates a new Basic and a new Cloze Note Type that support Markdown and KaTeX.
+
+This is a fork of [Jwrede/Anki-KaTeX-Markdown](https://github.com/Jwrede/Anki-KaTeX-Markdown). It installs under a distinct package name (`MDKaTeX-mil`) and creates separate card types (`KaTeX and Markdown (mil) Basic` / `Cloze`) so it can coexist with the upstream addon.
+
+Fork-specific change: math is rendered via [markdown-it-texmath](https://github.com/goessner/markdown-it-texmath) instead of a separate KaTeX auto-render pass, so `$` inside fenced/inline code blocks is no longer parsed as math.
 
 ![](https://github.com/Jwrede/Anki-KaTeX-Markdown/blob/main/example.gif)
 
@@ -20,4 +24,5 @@ Creates a new Basic and a new Cloze Note Type that support Markdown and KaTeX
 * Go to 
 <a href="https://ankiweb.net/shared/info/1087328706"><img src="https://preview.redd.it/fka0b5cc48t41.png?auto=webp&s=c26da98dca2863e1d0dddbfd59b5bea6165f4bcb" width="24"></a>
 to see how to install this addon for anki
-* To install locally download the latest [release](https://github.com/Jwrede/Anki-KaTeX-Markdown/releases) and install by opening **Anki → Tools → Add-ons → Install** from file, then select **MDKaTeX.ankiaddon**
+* To install this fork locally, download the latest [release](https://github.com/mil-ad/Anki-KaTeX-Markdown/releases) and install by opening **Anki → Tools → Add-ons → Install** from file, then select **MDKaTeX-mil.ankiaddon**
+* The upstream (non-fork) version is at <https://github.com/Jwrede/Anki-KaTeX-Markdown/releases>

@@ -11,9 +11,9 @@ jobs:
         run: |
           ls
           cd MDKaTeX
-          zip -r -q ../MDKaTeX.zip ./*
+          zip -r -q ../MDKaTeX-mil.zip ./*
           cd ..
-          mv MDKaTeX.zip MDKaTeX.ankiaddon
+          mv MDKaTeX-mil.zip MDKaTeX-mil.ankiaddon
           ls
       
       - name: Create Release
@@ -33,6 +33,6 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./MDKaTeX.ankiaddon
-          asset_name: MDKaTeX.ankiaddon
+          asset_path: ./MDKaTeX-mil.ankiaddon
+          asset_name: MDKaTeX-mil.ankiaddon
           asset_content_type: application/gzip
