@@ -39,7 +39,8 @@ HTMLforEditor = """
         var getResources = [
 					getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"),
 					getCSS("_texmath.min.css", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/css/texmath.min.css"),
-					getCSS("_highlight.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/default.min.css"),
+					getCSS("_highlight.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/github.min.css"),
+					getCSS("_highlight-dark.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/github-dark.min.css"),
 					getScript("_highlight.js", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/highlight.min.js"),
 					getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"),
 					getScript("_markdown-it.min.js", "https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"),
@@ -143,7 +144,8 @@ front = """
 	var getResources = [
 		getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"),
 		getCSS("_texmath.min.css", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/css/texmath.min.css"),
-		getCSS("_highlight.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/default.min.css"),
+		getCSS("_highlight.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/github.min.css"),
+		getCSS("_highlight-dark.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/github-dark.min.css"),
 		getScript("_highlight.js", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/highlight.min.js"),
 		getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"),
 		getScript("_markdown-it.min.js", "https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"),
@@ -248,7 +250,8 @@ back = """
 	var getResources = [
 		getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"),
 		getCSS("_texmath.min.css", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/css/texmath.min.css"),
-		getCSS("_highlight.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/default.min.css"),
+		getCSS("_highlight.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/github.min.css"),
+		getCSS("_highlight-dark.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/github-dark.min.css"),
 		getScript("_highlight.js", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/highlight.min.js"),
 		getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"),
 		getScript("_markdown-it.min.js", "https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"),
@@ -350,7 +353,8 @@ front_cloze = """
 	var getResources = [
 		getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"),
 		getCSS("_texmath.min.css", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/css/texmath.min.css"),
-		getCSS("_highlight.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/default.min.css"),
+		getCSS("_highlight.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/github.min.css"),
+		getCSS("_highlight-dark.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/github-dark.min.css"),
 		getScript("_highlight.js", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/highlight.min.js"),
 		getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"),
 		getScript("_markdown-it.min.js", "https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"),
@@ -447,7 +451,8 @@ back_cloze = """
 	var getResources = [
 		getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"),
 		getCSS("_texmath.min.css", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/css/texmath.min.css"),
-		getCSS("_highlight.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/default.min.css"),
+		getCSS("_highlight.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/github.min.css"),
+		getCSS("_highlight-dark.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/github-dark.min.css"),
 		getScript("_highlight.js", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/highlight.min.js"),
 		getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"),
 		getScript("_markdown-it.min.js", "https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"),
@@ -545,13 +550,20 @@ css = """
 
 .card {
   font-family: arial;
-  font-size: 20px;
+  font-size: 16px;
   color: black;
   background-color: white;
+}
+.card.nightMode {
+  color: #ececec;
+  background-color: #2f2f31;
 }
 table, th, td {
 	border: 1px solid black;
 	border-collapse: collapse;
+}
+.nightMode table, .nightMode th, .nightMode td {
+	border-color: #555;
 }
 #front, #back, #extra {
 	visibility: hidden;
@@ -562,5 +574,9 @@ pre code {
   display: block;
   padding: 20px;
   overflow: auto;
+}
+.nightMode pre code {
+  background-color: #0d1117;
+  border-color: #444;
 }
 """

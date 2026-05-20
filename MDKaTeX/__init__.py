@@ -22,12 +22,19 @@ def markdownPreview(editor):
                     border: 1px solid black;
                     border-collapse: collapse;
                 }
+                .nightMode table, .nightMode th, .nightMode td {
+                    border-color: #555;
+                }
                 pre code {
                     background-color: #eee;
                     border: 1px solid #999;
                     display: block;
                     padding: 20px;
                     overflow: auto;
+                }
+                .nightMode pre code {
+                    background-color: #0d1117;
+                    border-color: #444;
                 }`;
             document.head.appendChild(style);
         """)
@@ -129,6 +136,7 @@ def update():
     _add_file(os.path.join(addon_path, "_markdown-it.min.js"),
               "_markdown-it.min.js")
     _add_file(os.path.join(addon_path, "_highlight.css"), "_highlight.css")
+    _add_file(os.path.join(addon_path, "_highlight-dark.css"), "_highlight-dark.css")
     _add_file(os.path.join(addon_path, "_highlight.js"), "_highlight.js")
     _add_file(os.path.join(addon_path, "_mhchem.js"), "_mhchem.js")
     _add_file(os.path.join(addon_path, "_markdown-it-mark.js"),

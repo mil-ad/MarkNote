@@ -8,6 +8,8 @@ KATEX_VERSION             := 0.16.11
 MARKDOWN_IT_VERSION       := 14.1.0
 MARKDOWN_IT_MARK_VERSION  := 4.0.0
 HIGHLIGHT_JS_VERSION      := 11.10.0
+HIGHLIGHT_JS_LIGHT_THEME  := github
+HIGHLIGHT_JS_DARK_THEME   := github-dark
 TEXMATH_VERSION           := 1.0.0
 
 JSDELIVR := https://cdn.jsdelivr.net/npm
@@ -41,9 +43,13 @@ deps:
 	curl -fsSL $(JSDELIVR)/markdown-it@$(MARKDOWN_IT_VERSION)/dist/markdown-it.min.js -o $(SRC_DIR)/_markdown-it.min.js
 	@echo "→ markdown-it-mark $(MARKDOWN_IT_MARK_VERSION)"
 	curl -fsSL $(JSDELIVR)/markdown-it-mark@$(MARKDOWN_IT_MARK_VERSION)/dist/markdown-it-mark.min.js -o $(SRC_DIR)/_markdown-it-mark.js
-	@echo "→ highlight.js $(HIGHLIGHT_JS_VERSION)"
+	@echo "→ highlight.js $(HIGHLIGHT_JS_VERSION) ($(HIGHLIGHT_JS_LIGHT_THEME) + $(HIGHLIGHT_JS_DARK_THEME))"
 	curl -fsSL $(JSDELIVR)/@highlightjs/cdn-assets@$(HIGHLIGHT_JS_VERSION)/highlight.min.js -o $(SRC_DIR)/_highlight.js
-	curl -fsSL $(JSDELIVR)/@highlightjs/cdn-assets@$(HIGHLIGHT_JS_VERSION)/styles/default.min.css -o $(SRC_DIR)/_highlight.css
+	curl -fsSL $(JSDELIVR)/@highlightjs/cdn-assets@$(HIGHLIGHT_JS_VERSION)/styles/$(HIGHLIGHT_JS_LIGHT_THEME).min.css -o $(SRC_DIR)/_highlight.css
+	# Dark theme: scope every rule under .nightMode so it only applies in Anki's dark mode.
+	curl -fsSL $(JSDELIVR)/@highlightjs/cdn-assets@$(HIGHLIGHT_JS_VERSION)/styles/$(HIGHLIGHT_JS_DARK_THEME).min.css \
+	  | python3 -c 'import re,sys; css=re.sub(r"/\*.*?\*/", "", sys.stdin.read(), flags=re.S); print(re.sub(r"([^{}@]+)\{([^{}]*)\}", lambda m: ",".join(".nightMode "+s.strip() for s in m.group(1).split(","))+"{"+m.group(2)+"}", css))' \
+	  > $(SRC_DIR)/_highlight-dark.css
 	@echo "→ markdown-it-texmath $(TEXMATH_VERSION)"
 	curl -fsSL $(JSDELIVR)/markdown-it-texmath@$(TEXMATH_VERSION)/texmath.min.js -o $(SRC_DIR)/_texmath.min.js
 	curl -fsSL $(JSDELIVR)/markdown-it-texmath@$(TEXMATH_VERSION)/css/texmath.min.css -o $(SRC_DIR)/_texmath.min.css
