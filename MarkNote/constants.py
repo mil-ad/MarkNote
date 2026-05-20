@@ -1,0 +1,2 @@
+MODEL_NAME = 'MarkNote'
+CONF_NAME = 'MARKNOTE'
