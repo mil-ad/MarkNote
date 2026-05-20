@@ -1,553 +1,74 @@
-""" This file contains all the HTML / CSS strings for the different card types """
+"""Card templates and CSS for MarkNote note types.
 
-HTMLforEditor = """
-        var area = document.getElementById('markdown-area');
-        if(area) area.remove();
-        area = document.createElement('markdown-area');
-        area.id = 'markdown-area';
-        area.style.display = 'inline-block';
-        area.style.overflowY = 'auto';
-        area.style.padding = '1%';
-        area.style.visibility = 'hidden';
-        area.style.width = '98%';
-        area.style.height = '100%';
-
-        var fields = document.getElementById('fields');
-        if (fields !== null) {
-			keyupFunc = function() {
-				var text = '# Field 1\\n' + fields.children[0].children[1].shadowRoot.children[2].innerHTML;
-				text += "\\n# Field 2\\n" + fields.children[1].children[1].shadowRoot.children[2].innerHTML;
-				render(text);
-			}
-
-			document.body.appendChild(area);
-		}
-
-        else {
-			var fields = document.getElementsByClassName('fields')[0];
-
-			keyupFunc = function() {
-				var text = '# Field 1\\n' + fields.children[0].getElementsByClassName("rich-text-editable")[0].shadowRoot.children[2].innerHTML;
-				text += "\\n# Field 2\\n" + fields.children[1].getElementsByClassName("rich-text-editable")[0].shadowRoot.children[2].innerHTML;
-				render(text);
-			}
-
-			fields.appendChild(area);
-		}
-
-
-        var getResources = [
-					getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"),
-					getCSS("_texmath.min.css", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/css/texmath.min.css"),
-					getCSS("_highlight.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/github.min.css"),
-					getCSS("_highlight-dark.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/github-dark.min.css"),
-					getScript("_highlight.js", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/highlight.min.js"),
-					getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"),
-					getScript("_markdown-it.min.js", "https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"),
-					getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/npm/markdown-it-mark@4.0.0/dist/markdown-it-mark.min.js"),
-					getScript("_texmath.min.js", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/texmath.min.js")
-				];
-
-				main = function() {
-									keyupFunc();
-									document.addEventListener('keyup', keyupFunc);
-				}
-
-                                Promise.all(getResources).then(() => getScript("_mhchem.js", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/mhchem.min.js")).then(main);
-
-
-				function getScript(path, altURL) {
-					return new Promise((resolve, reject) => {
-						let script = document.createElement("script");
-						script.onload = resolve;
-						script.onerror = function() {
-							let script_online = document.createElement("script");
-							script_online.onload = resolve;
-							script_online.onerror = reject;
-							script_online.src = altURL;
-							document.head.appendChild(script_online);
-						}
-						script.src = path;
-						document.head.appendChild(script);
-					})
-				}
-
-				function getCSS(path, altURL) {
-					return new Promise((resolve, reject) => {
-						var css = document.createElement('link');
-						css.setAttribute('rel', 'stylesheet');
-						css.type = 'text/css';
-						css.onload = resolve;
-						css.onerror = function() {
-							var css_online = document.createElement('link');
-							css_online.setAttribute('rel', 'stylesheet');
-							css_online.type = 'text/css';
-							css_online.onload = resolve;
-							css_online.onerror = reject;
-							css_online.href = altURL;
-							document.head.appendChild(css_online);
-						}
-						css.href = path;
-						document.head.appendChild(css);
-					});
-				}
-
-				function render(text) {
-					markdown(text);
-					show();
-				}
-
-				function show() {
-					area.style.visibility = "visible";
-				}
-
-				function markdown(text) {
-					text = replaceInString(text);
-					let md = new markdownit({typographer: true, html:true, highlight: function (str, lang) {
-																	if (lang && hljs.getLanguage(lang)) {
-																			try {
-																					return hljs.highlight(str, { language: lang }).value;
-																			} catch (__) {}
-																	}
-
-																	return ''; // use external default escaping
-															}})
-								.use(markdownitMark)
-								.use(texmath, { engine: katex, delimiters: 'dollars', katexOptions: { throwOnError: false } });
-					area.innerHTML = md.render(text);
-				}
-
-				function replaceInString(str) {
-					str = str.replace(/<[\/]?pre[^>]*>/gi, "");
-					str = str.replace(/<br\s*[\/]?[^>]*>/gi, "\\n");
-					str = str.replace(/<div[^>]*>/gi, "\\n");
-					// Thanks Graham A!
-					str = str.replace(/<[\/]?span[^>]*>/gi, "")
-					str.replace(/<\/div[^>]*>/g, "\\n");
-					return replaceHTMLElementsInString(str);
-				}
-
-				function replaceHTMLElementsInString(str) {
-					str = str.replace(/&nbsp;/gi, " ");
-					str = str.replace(/&tab;/gi, "	");
-					str = str.replace(/&gt;/gi, ">");
-					str = str.replace(/&lt;/gi, "<");
-					return str.replace(/&amp;/gi, "&");
-				}
-        """
-
-front = """
-
-<div id="front"><pre>{{Front}}</pre></div>
-
-<script>
-	var getResources = [
-		getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"),
-		getCSS("_texmath.min.css", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/css/texmath.min.css"),
-		getCSS("_highlight.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/github.min.css"),
-		getCSS("_highlight-dark.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/github-dark.min.css"),
-		getScript("_highlight.js", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/highlight.min.js"),
-		getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"),
-		getScript("_markdown-it.min.js", "https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"),
-		getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/npm/markdown-it-mark@4.0.0/dist/markdown-it-mark.min.js"),
-		getScript("_texmath.min.js", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/texmath.min.js")
-	];
-        Promise.all(getResources).then(() => getScript("_mhchem.js", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/mhchem.min.js")).then(render).catch(show);
-
-
-	function getScript(path, altURL) {
-		return new Promise((resolve, reject) => {
-			let script = document.createElement("script");
-			script.onload = resolve;
-			script.onerror = function() {
-				let script_online = document.createElement("script");
-				script_online.onload = resolve;
-				script_online.onerror = reject;
-				script_online.src = altURL;
-				document.head.appendChild(script_online);
-			}
-			script.src = path;
-			document.head.appendChild(script);
-		})
-	}
-
-	function getCSS(path, altURL) {
-		return new Promise((resolve, reject) => {
-			var css = document.createElement('link');
-			css.setAttribute('rel', 'stylesheet');
-			css.type = 'text/css';
-			css.onload = resolve;
-			css.onerror = function() {
-				var css_online = document.createElement('link');
-				css_online.setAttribute('rel', 'stylesheet');
-				css_online.type = 'text/css';
-				css_online.onload = resolve;
-				css.onerror = reject;
-				css_online.href = altURL;
-				document.head.appendChild(css_online);
-			}
-			css.href = path;
-			document.head.appendChild(css);
-		});
-	}
-
-
-	function render() {
-		markdown("front");
-		show();
-	}
-
-	function show() {
-		document.getElementById("front").style.visibility = "visible";
-	}
-
-	function markdown(ID) {
-		let el = document.getElementById(ID);
-		let text = replaceInString(el.innerHTML);
-		let md = new markdownit({typographer: true, html:true, highlight: function (str, lang) {
-                            if (lang && hljs.getLanguage(lang)) {
-                                try {
-                                    return hljs.highlight(str, { language: lang }).value;
-                                } catch (__) {}
-                            }
-
-                            return ''; // use external default escaping
-                        }})
-				.use(markdownitMark)
-				.use(texmath, { engine: katex, delimiters: 'dollars', katexOptions: { throwOnError: false } });
-		el.innerHTML = md.render(text);
-	}
-
-	function replaceInString(str) {
-		str = str.replace(/<[\/]?pre[^>]*>/gi, "");
-		str = str.replace(/<br\s*[\/]?[^>]*>/gi, "\\n");
-		str = str.replace(/<div[^>]*>/gi, "\\n");
-		// Thanks Graham A!
-		str = str.replace(/<[\/]?span[^>]*>/gi, "")
-		str.replace(/<\/div[^>]*>/g, "\\n");
-		return replaceHTMLElementsInString(str);
-	}
-
-	function replaceHTMLElementsInString(str) {
-		str = str.replace(/&nbsp;/gi, " ");
-		str = str.replace(/&tab;/gi, "	");
-		str = str.replace(/&gt;/gi, ">");
-		str = str.replace(/&lt;/gi, "<");
-		return str.replace(/&amp;/gi, "&");
-	}
-</script>
+The heavy lifting (resource loading, markdown-it + texmath pipeline, editor
+preview wiring) lives in MarkNote/_render.js. The templates here just embed
+the field placeholders and bootstrap _render.js with a CDN fallback.
 """
 
-back = """
+_RENDER_JS_CDN = (
+    "https://cdn.jsdelivr.net/gh/mil-ad/Anki-KaTeX-Markdown@main/MarkNote/_render.js"
+)
 
+
+def _bootstrap(invocation):
+    """Return a <script> block that loads _render.js then runs `invocation`."""
+    return f"""<script>
+(function() {{
+    function go() {{ {invocation} }}
+    var s = document.createElement('script');
+    s.src = '_render.js';
+    s.onload = go;
+    s.onerror = function() {{
+        var s2 = document.createElement('script');
+        s2.src = '{_RENDER_JS_CDN}';
+        s2.onload = go;
+        document.head.appendChild(s2);
+    }};
+    document.head.appendChild(s);
+}})();
+</script>"""
+
+
+# Editor preview is injected via editor.web.eval(); no <script> wrapper.
+HTMLforEditor = f"""
+(function() {{
+    function go() {{ MarkNote.startEditor(); }}
+    var s = document.createElement('script');
+    s.src = '_render.js';
+    s.onload = go;
+    s.onerror = function() {{
+        var s2 = document.createElement('script');
+        s2.src = '{_RENDER_JS_CDN}';
+        s2.onload = go;
+        document.head.appendChild(s2);
+    }};
+    document.head.appendChild(s);
+}})();
+"""
+
+front = """
+<div id="front"><pre>{{Front}}</pre></div>
+""" + _bootstrap("MarkNote.start(['front']);")
+
+back = """
 <div id="front"><pre>{{Front}}</pre></div>
 
 <hr id=answer>
 
 <div id="back"><pre>{{Back}}</pre></div>
-
-<script>
-	var getResources = [
-		getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"),
-		getCSS("_texmath.min.css", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/css/texmath.min.css"),
-		getCSS("_highlight.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/github.min.css"),
-		getCSS("_highlight-dark.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/github-dark.min.css"),
-		getScript("_highlight.js", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/highlight.min.js"),
-		getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"),
-		getScript("_markdown-it.min.js", "https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"),
-		getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/npm/markdown-it-mark@4.0.0/dist/markdown-it-mark.min.js"),
-		getScript("_texmath.min.js", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/texmath.min.js")
-	];
-        Promise.all(getResources).then(() => getScript("_mhchem.js", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/mhchem.min.js")).then(render).catch(show);
-
-
-	function getScript(path, altURL) {
-		return new Promise((resolve, reject) => {
-			let script = document.createElement("script");
-			script.onload = resolve;
-			script.onerror = function() {
-				let script_online = document.createElement("script");
-				script_online.onload = resolve;
-				script_online.onerror = reject;
-				script_online.src = altURL;
-				document.head.appendChild(script_online);
-			}
-			script.src = path;
-			document.head.appendChild(script);
-		})
-	}
-
-	function getCSS(path, altURL) {
-		return new Promise((resolve, reject) => {
-			var css = document.createElement('link');
-			css.setAttribute('rel', 'stylesheet');
-			css.type = 'text/css';
-			css.onload = resolve;
-			css.onerror = function() {
-				var css_online = document.createElement('link');
-				css_online.setAttribute('rel', 'stylesheet');
-				css_online.type = 'text/css';
-				css_online.onload = resolve;
-				css_online.onerror = reject;
-				css_online.href = altURL;
-				document.head.appendChild(css_online);
-			}
-			css.href = path;
-			document.head.appendChild(css);
-		});
-	}
-
-	function render() {
-		markdown("front");
-		markdown("back");
-		show();
-	}
-
-	function show() {
-		document.getElementById("front").style.visibility = "visible";
-		document.getElementById("back").style.visibility = "visible";
-	}
-
-	function markdown(ID) {
-		let el = document.getElementById(ID);
-		let text = replaceInString(el.innerHTML);
-		let md = new markdownit({typographer: true, html:true, highlight: function (str, lang) {
-                            if (lang && hljs.getLanguage(lang)) {
-                                try {
-                                    return hljs.highlight(str, { language: lang }).value;
-                                } catch (__) {}
-                            }
-
-                            return ''; // use external default escaping
-                        }})
-				.use(markdownitMark)
-				.use(texmath, { engine: katex, delimiters: 'dollars', katexOptions: { throwOnError: false } });
-		el.innerHTML = md.render(text);
-	}
-
-	function replaceInString(str) {
-		str = str.replace(/<[\/]?pre[^>]*>/gi, "");
-		str = str.replace(/<br\s*[\/]?[^>]*>/gi, "\\n");
-		str = str.replace(/<div[^>]*>/gi, "\\n");
-		// Thanks Graham A!
-		str = str.replace(/<[\/]?span[^>]*>/gi, "")
-		str.replace(/<\/div[^>]*>/g, "\\n");
-		return replaceHTMLElementsInString(str);
-	}
-
-	function replaceHTMLElementsInString(str) {
-		str = str.replace(/&nbsp;/gi, " ");
-		str = str.replace(/&tab;/gi, "	");
-		str = str.replace(/&gt;/gi, ">");
-		str = str.replace(/&lt;/gi, "<");
-		return str.replace(/&amp;/gi, "&");
-	}
-</script>
-"""
+""" + _bootstrap("MarkNote.start(['front', 'back']);")
 
 front_cloze = """
-
 <div id="front"><pre>{{cloze:Text}}</pre></div>
-
-<script>
-	var getResources = [
-		getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"),
-		getCSS("_texmath.min.css", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/css/texmath.min.css"),
-		getCSS("_highlight.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/github.min.css"),
-		getCSS("_highlight-dark.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/github-dark.min.css"),
-		getScript("_highlight.js", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/highlight.min.js"),
-		getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"),
-		getScript("_markdown-it.min.js", "https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"),
-		getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/npm/markdown-it-mark@4.0.0/dist/markdown-it-mark.min.js"),
-		getScript("_texmath.min.js", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/texmath.min.js")
-	];
-        Promise.all(getResources).then(() => getScript("_mhchem.js", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/mhchem.min.js")).then(render).catch(show);
-
-
-	function getScript(path, altURL) {
-		return new Promise((resolve, reject) => {
-			let script = document.createElement("script");
-			script.onload = resolve;
-			script.onerror = function() {
-				let script_online = document.createElement("script");
-				script_online.onload = resolve;
-				script_online.onerror = reject;
-				script_online.src = altURL;
-				document.head.appendChild(script_online);
-			}
-			script.src = path;
-			document.head.appendChild(script);
-		})
-	}
-
-	function getCSS(path, altURL) {
-		return new Promise((resolve, reject) => {
-			var css = document.createElement('link');
-			css.setAttribute('rel', 'stylesheet');
-			css.type = 'text/css';
-			css.onload = resolve;
-			css.onerror = function() {
-				var css_online = document.createElement('link');
-				css_online.setAttribute('rel', 'stylesheet');
-				css_online.type = 'text/css';
-				css_online.onload = resolve;
-				css_online.onerror = reject;
-				css_online.href = altURL;
-				document.head.appendChild(css_online);
-			}
-			css.href = path;
-			document.head.appendChild(css);
-		});
-	}
-	function render() {
-		markdown("front");
-		show();
-	}
-	function show() {
-		document.getElementById("front").style.visibility = "visible";
-	}
-	function markdown(ID) {
-		let el = document.getElementById(ID);
-		let text = replaceInString(el.innerHTML);
-		let md = new markdownit({typographer: true, html:true, highlight: function (str, lang) {
-                            if (lang && hljs.getLanguage(lang)) {
-                                try {
-                                    return hljs.highlight(str, { language: lang }).value;
-                                } catch (__) {}
-                            }
-
-                            return ''; // use external default escaping
-                        }})
-				.use(markdownitMark)
-				.use(texmath, { engine: katex, delimiters: 'dollars', katexOptions: { throwOnError: false } });
-		el.innerHTML = md.render(text);
-	}
-	function replaceInString(str) {
-		str = str.replace(/<[\/]?pre[^>]*>/gi, "");
-		str = str.replace(/<br\s*[\/]?[^>]*>/gi, "\\n");
-		str = str.replace(/<div[^>]*>/gi, "\\n");
-		// Thanks Graham A!
-		str = str.replace(/<[\/]?span[^>]*>/gi, "")
-		str.replace(/<\/div[^>]*>/g, "\\n");
-		return replaceHTMLElementsInString(str);
-	}
-
-	function replaceHTMLElementsInString(str) {
-		str = str.replace(/&nbsp;/gi, " ");
-		str = str.replace(/&tab;/gi, "	");
-		str = str.replace(/&gt;/gi, ">");
-		str = str.replace(/&lt;/gi, "<");
-		return str.replace(/&amp;/gi, "&");
-	}
-</script>
-"""
+""" + _bootstrap("MarkNote.start(['front']);")
 
 back_cloze = """
-
 <div id="back"><pre>{{cloze:Text}}</pre></div><br>
 <div id="extra"><pre>{{Back Extra}}</pre></div>
-
-<script>
-	var getResources = [
-		getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"),
-		getCSS("_texmath.min.css", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/css/texmath.min.css"),
-		getCSS("_highlight.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/github.min.css"),
-		getCSS("_highlight-dark.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/github-dark.min.css"),
-		getScript("_highlight.js", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/highlight.min.js"),
-		getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"),
-		getScript("_markdown-it.min.js", "https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"),
-		getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/npm/markdown-it-mark@4.0.0/dist/markdown-it-mark.min.js"),
-		getScript("_texmath.min.js", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/texmath.min.js")
-	];
-        Promise.all(getResources).then(() => getScript("_mhchem.js", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/mhchem.min.js")).then(render).catch(show);
+""" + _bootstrap("MarkNote.start(['back', 'extra']);")
 
 
-	function getScript(path, altURL) {
-		return new Promise((resolve, reject) => {
-			let script = document.createElement("script");
-			script.onload = resolve;
-			script.onerror = function() {
-				let script_online = document.createElement("script");
-				script_online.onload = resolve;
-				script_online.onerror = reject;
-				script_online.src = altURL;
-				document.head.appendChild(script_online);
-			}
-			script.src = path;
-			document.head.appendChild(script);
-		})
-	}
-
-	function getCSS(path, altURL) {
-		return new Promise((resolve, reject) => {
-			var css = document.createElement('link');
-			css.setAttribute('rel', 'stylesheet');
-			css.type = 'text/css';
-			css.onload = resolve;
-			css.onerror = function() {
-				var css_online = document.createElement('link');
-				css_online.setAttribute('rel', 'stylesheet');
-				css_online.type = 'text/css';
-				css_online.onload = resolve;
-				css_online.onerror = reject;
-				css_online.href = altURL;
-				document.head.appendChild(css_online);
-			}
-			css.href = path;
-			document.head.appendChild(css);
-		});
-	}
-
-
-	function render() {
-		markdown("back");
-		markdown("extra");
-		show();
-	}
-
-	function show() {
-		document.getElementById("back").style.visibility = "visible";
-		document.getElementById("extra").style.visibility = "visible";
-	}
-
-	function markdown(ID) {
-		let el = document.getElementById(ID);
-		let text = replaceInString(el.innerHTML);
-		let md = new markdownit({typographer: true, html:true, highlight: function (str, lang) {
-                            if (lang && hljs.getLanguage(lang)) {
-                                try {
-                                    return hljs.highlight(str, { language: lang }).value;
-                                } catch (__) {}
-                            }
-
-                            return ''; // use external default escaping
-                        }})
-				.use(markdownitMark)
-				.use(texmath, { engine: katex, delimiters: 'dollars', katexOptions: { throwOnError: false } });
-		el.innerHTML = md.render(text);
-	}
-	function replaceInString(str) {
-		str = str.replace(/<[\/]?pre[^>]*>/gi, "");
-		str = str.replace(/<br\s*[\/]?[^>]*>/gi, "\\n");
-		str = str.replace(/<div[^>]*>/gi, "\\n");
-		// Thanks Graham A!
-		str = str.replace(/<[\/]?span[^>]*>/gi, "")
-		str.replace(/<\/div[^>]*>/g, "\\n");
-		return replaceHTMLElementsInString(str);
-	}
-
-	function replaceHTMLElementsInString(str) {
-		str = str.replace(/&nbsp;/gi, " ");
-		str = str.replace(/&tab;/gi, "	");
-		str = str.replace(/&gt;/gi, ">");
-		str = str.replace(/&lt;/gi, "<");
-		return str.replace(/&amp;/gi, "&");
-	}
-</script>
-
-"""
 css = """
-
 .card {
   font-family: arial;
   font-size: 16px;

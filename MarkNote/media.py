@@ -10,6 +10,7 @@ from aqt import mw
 
 # Files in the addon directory (flat) to mirror into the media folder.
 BUNDLED_FILES = [
+    "_render.js",
     "_katex.min.js",
     "_katex.css",
     "_markdown-it.min.js",
