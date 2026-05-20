@@ -13,6 +13,15 @@ _EDITOR_STYLE = """
         .nightMode table, .nightMode th, .nightMode td {
             border-color: #555;
         }
+        :not(pre) > code {
+            background-color: rgba(175, 184, 193, 0.25);
+            padding: 0.15em 0.4em;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .nightMode :not(pre) > code {
+            background-color: rgba(110, 118, 129, 0.4);
+        }
         pre code {
             background-color: #eee;
             border: 1px solid #999;
