@@ -6,8 +6,8 @@ from aqt import mw
 from anki.hooks import addHook
 import anki
 
-MODEL_NAME = 'KaTeX and Markdown (mil)'
-CONF_NAME = 'MDKATEX_MIL'
+MODEL_NAME = 'MarkNote'
+CONF_NAME = 'MARKNOTE'
 
 
 def markdownPreview(editor):

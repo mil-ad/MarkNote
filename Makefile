@@ -1,6 +1,6 @@
-PACKAGE := MDKaTeX-mil
+PACKAGE := MarkNote
 ANKIADDON := $(PACKAGE).ankiaddon
-SRC_DIR := MDKaTeX
+SRC_DIR := MarkNote
 FONTS_DIR := $(SRC_DIR)/fonts
 
 # Pinned dependency versions. Bump these and run `make deps` to refresh.

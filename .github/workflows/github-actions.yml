@@ -10,10 +10,10 @@ jobs:
       - name: Create ankiaddon
         run: |
           ls
-          cd MDKaTeX
-          zip -r -q ../MDKaTeX-mil.zip ./*
+          cd MarkNote
+          zip -r -q ../MarkNote.zip ./*
           cd ..
-          mv MDKaTeX-mil.zip MDKaTeX-mil.ankiaddon
+          mv MarkNote.zip MarkNote.ankiaddon
           ls
       
       - name: Create Release
@@ -33,6 +33,6 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./MDKaTeX-mil.ankiaddon
-          asset_name: MDKaTeX-mil.ankiaddon
+          asset_path: ./MarkNote.ankiaddon
+          asset_name: MarkNote.ankiaddon
           asset_content_type: application/gzip
