@@ -37,13 +37,13 @@ HTMLforEditor = """
 
 
         var getResources = [
-					getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"),
+					getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"),
 					getCSS("_texmath.min.css", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/css/texmath.min.css"),
-					getCSS("_highlight.css", "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/styles/default.min.css"),
-					getScript("_highlight.js", "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/highlight.min.js"),
-					getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"),
-					getScript("_markdown-it.min.js", "https://cdnjs.cloudflare.com/ajax/libs/markdown-it/12.0.4/markdown-it.min.js"),
-					getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/_markdown-it-mark.js"),
+					getCSS("_highlight.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/default.min.css"),
+					getScript("_highlight.js", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/highlight.min.js"),
+					getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"),
+					getScript("_markdown-it.min.js", "https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"),
+					getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/npm/markdown-it-mark@4.0.0/dist/markdown-it-mark.min.js"),
 					getScript("_texmath.min.js", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/texmath.min.js")
 				];
 
@@ -52,7 +52,7 @@ HTMLforEditor = """
 									document.addEventListener('keyup', keyupFunc);
 				}
 
-                                Promise.all(getResources).then(() => getScript("_mhchem.js", "https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/mhchem.min.js")).then(main);
+                                Promise.all(getResources).then(() => getScript("_mhchem.js", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/mhchem.min.js")).then(main);
 
 
 				function getScript(path, altURL) {
@@ -111,7 +111,7 @@ HTMLforEditor = """
 
 																	return ''; // use external default escaping
 															}})
-								.use(markdownItMark)
+								.use(markdownitMark)
 								.use(texmath, { engine: katex, delimiters: 'dollars', katexOptions: { throwOnError: false } });
 					area.innerHTML = md.render(text);
 				}
@@ -141,16 +141,16 @@ front = """
 
 <script>
 	var getResources = [
-		getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"),
+		getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"),
 		getCSS("_texmath.min.css", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/css/texmath.min.css"),
-		getCSS("_highlight.css", "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/styles/default.min.css"),
-		getScript("_highlight.js", "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/highlight.min.js"),
-		getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"),
-		getScript("_markdown-it.min.js", "https://cdnjs.cloudflare.com/ajax/libs/markdown-it/12.0.4/markdown-it.min.js"),
-		getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/_markdown-it-mark.js"),
+		getCSS("_highlight.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/default.min.css"),
+		getScript("_highlight.js", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/highlight.min.js"),
+		getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"),
+		getScript("_markdown-it.min.js", "https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"),
+		getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/npm/markdown-it-mark@4.0.0/dist/markdown-it-mark.min.js"),
 		getScript("_texmath.min.js", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/texmath.min.js")
 	];
-        Promise.all(getResources).then(() => getScript("_mhchem.js", "https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/mhchem.min.js")).then(render).catch(show);
+        Promise.all(getResources).then(() => getScript("_mhchem.js", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/mhchem.min.js")).then(render).catch(show);
 
 
 	function getScript(path, altURL) {
@@ -211,7 +211,7 @@ front = """
 
                             return ''; // use external default escaping
                         }})
-				.use(markdownItMark)
+				.use(markdownitMark)
 				.use(texmath, { engine: katex, delimiters: 'dollars', katexOptions: { throwOnError: false } });
 		el.innerHTML = md.render(text);
 	}
@@ -246,16 +246,16 @@ back = """
 
 <script>
 	var getResources = [
-		getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"),
+		getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"),
 		getCSS("_texmath.min.css", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/css/texmath.min.css"),
-		getCSS("_highlight.css", "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/styles/default.min.css"),
-		getScript("_highlight.js", "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/highlight.min.js"),
-		getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"),
-		getScript("_markdown-it.min.js", "https://cdnjs.cloudflare.com/ajax/libs/markdown-it/12.0.4/markdown-it.min.js"),
-		getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/_markdown-it-mark.js"),
+		getCSS("_highlight.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/default.min.css"),
+		getScript("_highlight.js", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/highlight.min.js"),
+		getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"),
+		getScript("_markdown-it.min.js", "https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"),
+		getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/npm/markdown-it-mark@4.0.0/dist/markdown-it-mark.min.js"),
 		getScript("_texmath.min.js", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/texmath.min.js")
 	];
-        Promise.all(getResources).then(() => getScript("_mhchem.js", "https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/mhchem.min.js")).then(render).catch(show);
+        Promise.all(getResources).then(() => getScript("_mhchem.js", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/mhchem.min.js")).then(render).catch(show);
 
 
 	function getScript(path, altURL) {
@@ -317,7 +317,7 @@ back = """
 
                             return ''; // use external default escaping
                         }})
-				.use(markdownItMark)
+				.use(markdownitMark)
 				.use(texmath, { engine: katex, delimiters: 'dollars', katexOptions: { throwOnError: false } });
 		el.innerHTML = md.render(text);
 	}
@@ -348,16 +348,16 @@ front_cloze = """
 
 <script>
 	var getResources = [
-		getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"),
+		getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"),
 		getCSS("_texmath.min.css", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/css/texmath.min.css"),
-		getCSS("_highlight.css", "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/styles/default.min.css"),
-		getScript("_highlight.js", "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/highlight.min.js"),
-		getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"),
-		getScript("_markdown-it.min.js", "https://cdnjs.cloudflare.com/ajax/libs/markdown-it/12.0.4/markdown-it.min.js"),
-		getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/_markdown-it-mark.js"),
+		getCSS("_highlight.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/default.min.css"),
+		getScript("_highlight.js", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/highlight.min.js"),
+		getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"),
+		getScript("_markdown-it.min.js", "https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"),
+		getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/npm/markdown-it-mark@4.0.0/dist/markdown-it-mark.min.js"),
 		getScript("_texmath.min.js", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/texmath.min.js")
 	];
-        Promise.all(getResources).then(() => getScript("_mhchem.js", "https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/mhchem.min.js")).then(render).catch(show);
+        Promise.all(getResources).then(() => getScript("_mhchem.js", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/mhchem.min.js")).then(render).catch(show);
 
 
 	function getScript(path, altURL) {
@@ -414,7 +414,7 @@ front_cloze = """
 
                             return ''; // use external default escaping
                         }})
-				.use(markdownItMark)
+				.use(markdownitMark)
 				.use(texmath, { engine: katex, delimiters: 'dollars', katexOptions: { throwOnError: false } });
 		el.innerHTML = md.render(text);
 	}
@@ -445,16 +445,16 @@ back_cloze = """
 
 <script>
 	var getResources = [
-		getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"),
+		getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"),
 		getCSS("_texmath.min.css", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/css/texmath.min.css"),
-		getCSS("_highlight.css", "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/styles/default.min.css"),
-		getScript("_highlight.js", "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/highlight.min.js"),
-		getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"),
-		getScript("_markdown-it.min.js", "https://cdnjs.cloudflare.com/ajax/libs/markdown-it/12.0.4/markdown-it.min.js"),
-		getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/_markdown-it-mark.js"),
+		getCSS("_highlight.css", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/styles/default.min.css"),
+		getScript("_highlight.js", "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/highlight.min.js"),
+		getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"),
+		getScript("_markdown-it.min.js", "https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"),
+		getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/npm/markdown-it-mark@4.0.0/dist/markdown-it-mark.min.js"),
 		getScript("_texmath.min.js", "https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/texmath.min.js")
 	];
-        Promise.all(getResources).then(() => getScript("_mhchem.js", "https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/mhchem.min.js")).then(render).catch(show);
+        Promise.all(getResources).then(() => getScript("_mhchem.js", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/mhchem.min.js")).then(render).catch(show);
 
 
 	function getScript(path, altURL) {
@@ -517,7 +517,7 @@ back_cloze = """
 
                             return ''; // use external default escaping
                         }})
-				.use(markdownItMark)
+				.use(markdownitMark)
 				.use(texmath, { engine: katex, delimiters: 'dollars', katexOptions: { throwOnError: false } });
 		el.innerHTML = md.render(text);
 	}

@@ -141,8 +141,9 @@ def update():
 
 
 def _add_file(path, filename):
-    if not os.path.isfile(os.path.join(mw.col.media.dir(), filename)):
-        mw.col.media.add_file(path)
+    # Always overwrite: addon updates need to push new bundled JS/CSS/fonts
+    # into the media folder. Anki's media sync detects the content change.
+    shutil.copyfile(path, os.path.join(mw.col.media.dir(), filename))
 
 
 addHook("profileLoaded", create_model_if_necessacy)
