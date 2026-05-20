@@ -1,5 +1,6 @@
-name: GitHub Actions Demo
-on: [push]
+name: Release MarkNote ankiaddon
+on:
+  workflow_dispatch:
 jobs:
   To-Ankiaddon:
     runs-on: ubuntu-latest
@@ -10,10 +11,10 @@ jobs:
       - name: Create ankiaddon
         run: |
           ls
-          cd MDKaTeX
-          zip -r -q ../MDKaTeX.zip ./*
+          cd MarkNote
+          zip -r -q ../MarkNote.zip ./*
           cd ..
-          mv MDKaTeX.zip MDKaTeX.ankiaddon
+          mv MarkNote.zip MarkNote.ankiaddon
           ls
       
       - name: Create Release
@@ -33,6 +34,6 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./MDKaTeX.ankiaddon
-          asset_name: MDKaTeX.ankiaddon
+          asset_path: ./MarkNote.ankiaddon
+          asset_name: MarkNote.ankiaddon
           asset_content_type: application/gzip
