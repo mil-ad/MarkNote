@@ -5,6 +5,8 @@ preview wiring) lives in MarkNote/_render.js. The templates here just embed
 the field placeholders and bootstrap _render.js with a CDN fallback.
 """
 
+from .constants import RENDER_FILE
+
 _RENDER_JS_CDN = (
     "https://cdn.jsdelivr.net/gh/mil-ad/MarkNote@main/MarkNote/_render.js"
 )
@@ -16,7 +18,7 @@ def _bootstrap(invocation):
 (function() {{
     function go() {{ {invocation} }}
     var s = document.createElement('script');
-    s.src = '_render.js';
+    s.src = '{RENDER_FILE}';
     s.onload = go;
     s.onerror = function() {{
         var s2 = document.createElement('script');
@@ -34,7 +36,7 @@ HTMLforEditor = f"""
 (function() {{
     function go() {{ MarkNote.startEditor(); }}
     var s = document.createElement('script');
-    s.src = '_render.js';
+    s.src = '{RENDER_FILE}';
     s.onload = go;
     s.onerror = function() {{
         var s2 = document.createElement('script');
