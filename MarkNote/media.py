@@ -8,9 +8,13 @@ import shutil
 
 from aqt import mw
 
+from .constants import RENDER_FILE
+
 # Files in the addon directory (flat) to mirror into the media folder.
+# _render.js is handled separately: it's copied under a content-hashed name
+# (RENDER_FILE) so a stale copy from an out-of-date install on another synced
+# machine can't shadow it.
 BUNDLED_FILES = [
-    "_render.js",
     "_katex.min.js",
     "_katex.css",
     "_markdown-it.min.js",
@@ -34,6 +38,9 @@ def sync_media(addon_path):
         legacy_path = os.path.join(media_dir, legacy)
         if os.path.isdir(legacy_path):
             shutil.rmtree(legacy_path)
+
+    _copy(os.path.join(addon_path, "_render.js"),
+          os.path.join(media_dir, RENDER_FILE))
 
     for filename in BUNDLED_FILES:
         _copy(os.path.join(addon_path, filename),
