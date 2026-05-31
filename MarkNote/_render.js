@@ -87,8 +87,10 @@ function newMarkdownIt() {
     })
     .use(window.markdownitMark)
     .use(window.texmath, {
+        // 'dollars'  → $...$ inline, $$...$$ display
+        // 'brackets' → \(...\) inline, \[...\] display
         engine: window.katex,
-        delimiters: 'dollars',
+        delimiters: ['dollars', 'brackets'],
         katexOptions: { throwOnError: false },
     });
 }

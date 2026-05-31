@@ -6,7 +6,7 @@ the field placeholders and bootstrap _render.js with a CDN fallback.
 """
 
 _RENDER_JS_CDN = (
-    "https://cdn.jsdelivr.net/gh/mil-ad/Anki-KaTeX-Markdown@main/MarkNote/_render.js"
+    "https://cdn.jsdelivr.net/gh/mil-ad/MarkNote@main/MarkNote/_render.js"
 )
 
 
