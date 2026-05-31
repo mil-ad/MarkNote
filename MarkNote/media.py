@@ -4,11 +4,15 @@ The media folder syncs to AnkiWeb, so card templates work on any client
 (including mobile) without the addon installed there.
 """
 import os
+import re
 import shutil
 
 from aqt import mw
 
 from .constants import RENDER_FILE
+
+# Matches the legacy unversioned _render.js and any content-hashed _render-<hash>.js.
+_RENDER_RE = re.compile(r"^_render(-[0-9a-f]+)?\.js$")
 
 # Files in the addon directory (flat) to mirror into the media folder.
 # _render.js is handled separately: it's copied under a content-hashed name
@@ -51,8 +55,35 @@ def sync_media(addon_path):
         _copy(os.path.join(fonts_dir, font),
               os.path.join(media_dir, font))
 
+    _prune_old_render(media_dir)
+
+
+def _prune_old_render(media_dir):
+    """Trash superseded _render*.js copies so content-hashed names don't pile up.
+
+    Removal goes through col.media.trash_files() rather than os.remove(): per
+    the addon docs, the provided methods mark the change for sync (and the files
+    go to the media trash rather than vanishing). Best-effort — a failure here
+    must never break profile load. Note: while another synced machine is still
+    on an older addon, it will keep re-adding its own _render copy, so the two
+    may trash/re-add each other's file until every machine is updated. That's
+    sync churn, not breakage: each machine's template references the exact name
+    it just wrote, so template and renderer always stay a matched pair.
+    """
+    try:
+        stale = [
+            name for name in os.listdir(media_dir)
+            if name != RENDER_FILE and _RENDER_RE.match(name)
+        ]
+        if stale:
+            mw.col.media.trash_files(stale)
+    except Exception:
+        pass
+
 
 def _copy(src, dst):
     # Always overwrite: addon updates need to push new bundled files into the
-    # media folder. Anki's media sync detects the content change.
+    # media folder. Anki's media sync detects the content change. (The official
+    # add_file/write_data are unsuitable here — they rename on collision, which
+    # would break the fixed filenames the templates reference.)
     shutil.copyfile(src, dst)
