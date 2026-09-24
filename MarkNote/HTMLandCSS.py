@@ -111,4 +111,14 @@ pre code {
   background-color: #0d1117;
   border-color: #444;
 }
+blockquote {
+  margin: 0 0 1em 0;
+  padding: 0 1em;
+  color: #656d76;
+  border-left: 0.25em solid #d0d7de;
+}
+.nightMode blockquote {
+  color: #9198a1;
+  border-left-color: #3d444d;
+}
 """
