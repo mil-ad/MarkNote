@@ -21,8 +21,10 @@ _JS_BASE = "/_addons/" + ADDON_PACKAGE + "/"
 _CSS_BASE = "/"
 
 
-def _start_js():
-    opts = {"jsBase": _JS_BASE, "cssBase": _CSS_BASE}
+def _start_js(field_fonts):
+    # field_fonts: one {"family", "size"} per field, so each overlay renders in
+    # the same font as the raw source it covers (whatever the user set it to).
+    opts = {"jsBase": _JS_BASE, "cssBase": _CSS_BASE, "fieldFonts": field_fonts}
     return """
 (function() {
     if (!document.getElementById(%(style_id)s)) {
@@ -56,6 +58,7 @@ _STOP_JS = """
 def on_load_note(editor):
     notetype = editor.note.note_type()
     if notetype["name"] in _TARGET_MODELS:
-        editor.web.eval(_start_js())
+        fonts = [{"family": f.get("font"), "size": f.get("size")} for f in notetype["flds"]]
+        editor.web.eval(_start_js(fonts))
     else:
         editor.web.eval(_STOP_JS)

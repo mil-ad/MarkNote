@@ -241,7 +241,9 @@ function focusField(field, element) {
 }
 
 // Wire one field: overlay element, content tracking, show/hide, height fit.
-function attachFieldPreview(field, md, state) {
+// `font` ({family, size}) is the field's editing font, so the rendered view
+// matches the raw source it covers.
+function attachFieldPreview(field, md, state, font) {
     var p = {
         field: field,
         content: '',
@@ -309,6 +311,10 @@ function attachFieldPreview(field, md, state) {
 
         var overlay = document.createElement('div');
         overlay.className = 'marknote-preview';
+        if (font) {
+            if (font.family) overlay.style.fontFamily = font.family;
+            if (font.size) overlay.style.fontSize = font.size + 'px';
+        }
         overlay.addEventListener('click', function () {
             p.setEditing(true);
             focusField(field, element);
@@ -392,7 +398,7 @@ window.MarkNote = {
         });
     },
 
-    // opts: { jsBase, cssBase }
+    // opts: { jsBase, cssBase, fieldFonts: [{family, size}, ...] }
     startEditor: function (opts) {
         opts = opts || {};
         this.stopEditor();
@@ -416,7 +422,8 @@ window.MarkNote = {
             var fields = results[1] || [];
             if (state.cancelled) return;
             var md = newMarkdownIt();
-            var previews = fields.map(function (field) { return attachFieldPreview(field, md, state); });
+            var fonts = opts.fieldFonts || [];
+            var previews = fields.map(function (field, i) { return attachFieldPreview(field, md, state, fonts[i]); });
             trackFocus(instance, previews, state);
         }).catch(function (err) {
             console.error(err);

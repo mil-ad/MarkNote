@@ -8,6 +8,13 @@ editor's bootstrap lives in editor.py because it loads from a different URL.
 
 from .constants import RENDER_CDN_URL, RENDER_FILE
 
+# Body font for rendered cards. models.py gives MarkNote fields the same
+# "Editing Font" so the raw source in the editor, the preview overlay and the
+# final card all share one size (Anki's stock default for new fields is 20px,
+# noticeably larger than the rest of the UI).
+FONT_FAMILY = "Arial"
+FONT_SIZE = 16
+
 
 def _bootstrap(invocation):
     """Return a <script> block that loads _render.js then runs `invocation`."""
@@ -98,8 +105,8 @@ blockquote {
 
 css = """
 .card {
-  font-family: arial;
-  font-size: 16px;
+  font-family: %s;
+  font-size: %dpx;
   color: black;
   background-color: white;
 }
@@ -110,7 +117,7 @@ css = """
 #front, #back, #extra {
   visibility: hidden;
 }
-""" + content_css
+""" % (FONT_FAMILY, FONT_SIZE) + content_css
 
 # Editor-only additions: the preview overlay that sits on top of each field's
 # editing area while the field is unfocused, plus Anki's default cloze look

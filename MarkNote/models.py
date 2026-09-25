@@ -9,13 +9,19 @@ the collection (or create sync traffic) on every launch.
 Fields are set to Anki's "Use HTML editor by default" option, so the editor
 shows the raw markdown source in a plain-text (CodeMirror) input rather than
 the rich-text WYSIWYG one. The rendered preview overlay (see editor.py) sits
-on top of that whenever the field isn't focused.
+on top of that whenever the field isn't focused. Their "Editing Font" is set
+to the card font so source, preview and card share one size.
 """
 from anki.consts import MODEL_CLOZE, MODEL_STD
 from aqt import mw
 
 from .constants import MODEL_NAME
-from .HTMLandCSS import back, back_cloze, css, front, front_cloze
+from .HTMLandCSS import (FONT_FAMILY, FONT_SIZE, back, back_cloze, css, front,
+                         front_cloze)
+
+# Anki's stock defaults for a new field. Fields still at these are treated as
+# never customised and moved to the card font; anything else is left alone.
+_STOCK_FONT = ("Arial", 20)
 
 BASIC_NAME = MODEL_NAME + " Basic"
 CLOZE_NAME = MODEL_NAME + " Cloze"
@@ -39,6 +45,8 @@ def _create(name, kind, field_names, qfmt, afmt):
     for field_name in field_names:
         field = mm.new_field(field_name)
         field["plainText"] = True
+        field["font"] = FONT_FAMILY
+        field["size"] = FONT_SIZE
         mm.add_field(notetype, field)
     template = mm.new_template(name)
     template["qfmt"] = qfmt
@@ -51,12 +59,18 @@ def _create(name, kind, field_names, qfmt, afmt):
 def _push_templates(notetype, qfmt, afmt):
     template = notetype["tmpls"][0]
     fields_need_plain = [f for f in notetype["flds"] if not f.get("plainText")]
+    fields_need_font = [f for f in notetype["flds"]
+                        if (f.get("font"), f.get("size")) == _STOCK_FONT]
     if (template["qfmt"] == qfmt and template["afmt"] == afmt
-            and notetype["css"] == css and not fields_need_plain):
+            and notetype["css"] == css
+            and not fields_need_plain and not fields_need_font):
         return
     template["qfmt"] = qfmt
     template["afmt"] = afmt
     notetype["css"] = css
     for field in fields_need_plain:
         field["plainText"] = True
+    for field in fields_need_font:
+        field["font"] = FONT_FAMILY
+        field["size"] = FONT_SIZE
     mw.col.models.update_dict(notetype)
