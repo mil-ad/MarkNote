@@ -112,13 +112,30 @@ css = """
 }
 """ + content_css
 
-# The reviewer styles .cloze itself; the editor page doesn't, so the preview
-# adds Anki's default cloze look.
+# Editor-only additions: the preview overlay that sits on top of each field's
+# editing area while the field is unfocused, plus Anki's default cloze look
+# (the reviewer styles .cloze itself; the editor page doesn't).
 editor_css = content_css + """
-#markdown-area {
+.marknote-preview {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: none;
   box-sizing: border-box;
-  width: 100%;
-  padding: 1em;
+  overflow-y: auto;
+  padding: 6px;
+  cursor: text;
+  background: var(--canvas-elevated, white);
+  color: var(--fg, inherit);
+}
+.marknote-preview.visible {
+  display: block;
+}
+.marknote-preview > :first-child {
+  margin-top: 0;
+}
+.marknote-preview > :last-child {
+  margin-bottom: 0;
 }
 .cloze {
   font-weight: bold;

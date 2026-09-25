@@ -2,8 +2,9 @@
  *
  * Loaded once per page via <script src>. Exposes window.MarkNote with:
  *   start(ids)         — load deps, render the listed elements, reveal them
- *   startEditor(opts)  — load deps, wire up the editor's live preview pane
- *   stopEditor()       — tear the preview pane down again
+ *   startEditor(opts)  — load deps, overlay a rendered preview on each editor
+ *                        field whenever that field doesn't have focus
+ *   stopEditor()       — remove the overlays again
  *
  * Anki's reviewer keeps a single page alive and re-runs template scripts for
  * every card, so this file may be <script>-injected many times per session.
@@ -192,17 +193,188 @@ function reveal(ids) {
 }
 
 // --- Editor preview -------------------------------------------------------
+//
+// Each field gets an overlay inside its editing area. While the field has
+// focus the overlay is hidden and you see (and type) the raw markdown; as soon
+// as focus moves elsewhere the overlay shows the rendered result on top of the
+// raw text. Clicking the overlay drops you back into the raw text.
+//
+// Everything goes through the anki/NoteEditor API (field elements, content
+// stores, the focusedField store, refocus()) rather than probing Anki's DOM.
 
 var editorCleanup = null;
 
-function noteEditorFields() {
+function noteEditorInstance() {
     try {
         var api = window.require('anki/NoteEditor');
-        var instance = api.instances[api.instances.length - 1];
-        return instance ? instance.fields : null;
+        return api.instances[api.instances.length - 1] || null;
     } catch (__) {
         return null;
     }
+}
+
+// `fields` has been a plain array, but be tolerant of a store or promise.
+function resolveFields(instance) {
+    var fields = instance.fields;
+    if (fields && typeof fields.subscribe === 'function') {
+        var value = null;
+        fields.subscribe(function (v) { value = v; })();
+        return Promise.resolve(value);
+    }
+    return Promise.resolve(fields);
+}
+
+function sameField(a, b) {
+    return !!a && !!b && (a === b || (a.element !== undefined && a.element === b.element));
+}
+
+// Focus the field's editing input. The API's refocus() targets the first
+// focusable input; fall back to the rich-text host if that didn't take.
+function focusField(field, element) {
+    try {
+        if (field.editingArea && typeof field.editingArea.refocus === 'function') field.editingArea.refocus();
+    } catch (__) {}
+    if (element && !element.contains(document.activeElement)) {
+        var input = element.querySelector('.rich-text-editable, .CodeMirror textarea');
+        if (input && typeof input.focus === 'function') input.focus();
+    }
+}
+
+// Wire one field: overlay element, content tracking, show/hide, height fit.
+function attachFieldPreview(field, md, state) {
+    var p = {
+        field: field,
+        content: '',
+        dirty: true,
+        editing: false,
+        element: null,
+        host: null,
+        overlay: null,
+    };
+
+    function fit() {
+        // Let the overlay size to its content, measure, then pin the host to
+        // that height so the rendered view isn't clipped to (or padded by) the
+        // raw text's height underneath.
+        p.overlay.style.bottom = 'auto';
+        var h = p.overlay.offsetHeight;
+        p.overlay.style.bottom = '';
+        if (h > 0) {
+            p.host.style.minHeight = h + 'px';
+            p.host.style.maxHeight = h + 'px';
+            p.host.style.overflow = 'hidden';
+        }
+    }
+
+    function unfit() {
+        p.host.style.minHeight = '';
+        p.host.style.maxHeight = '';
+        p.host.style.overflow = '';
+    }
+
+    p.update = function () {
+        if (!p.overlay || state.cancelled) return;
+        var show = !p.editing && ankiHtmlToSource(p.content).trim() !== '';
+        if (show) {
+            if (p.dirty) {
+                p.overlay.innerHTML = render(md, p.content);
+                p.dirty = false;
+            }
+            p.overlay.classList.add('visible');
+            fit();
+        } else {
+            p.overlay.classList.remove('visible');
+            unfit();
+        }
+    };
+
+    p.setEditing = function (editing) {
+        if (p.editing === editing) return;
+        p.editing = editing;
+        p.update();
+    };
+
+    if (field.editingArea && field.editingArea.content) {
+        state.unsubs.push(field.editingArea.content.subscribe(function (value) {
+            p.content = value || '';
+            p.dirty = true;
+            p.update();
+        }));
+    }
+
+    Promise.resolve(field.element).then(function (element) {
+        if (state.cancelled || !element) return;
+        p.element = element;
+        p.host = element.querySelector('.editing-area') || element;
+
+        var overlay = document.createElement('div');
+        overlay.className = 'marknote-preview';
+        overlay.addEventListener('click', function () {
+            p.setEditing(true);
+            focusField(field, element);
+        });
+        var hostPosition = p.host.style.position;
+        p.host.style.position = 'relative';
+        p.host.appendChild(overlay);
+        p.overlay = overlay;
+
+        var resize = null;
+        if (window.ResizeObserver) {
+            resize = new ResizeObserver(function () {
+                if (overlay.classList.contains('visible')) fit();
+            });
+            resize.observe(p.host);
+        }
+        state.cleanups.push(function () {
+            if (resize) resize.disconnect();
+            overlay.remove();
+            unfit();
+            p.host.style.position = hostPosition;
+        });
+
+        p.update();
+    });
+
+    return p;
+}
+
+// Keep each overlay in step with which field has focus.
+function trackFocus(instance, previews, state) {
+    function apply(focused) {
+        for (var i = 0; i < previews.length; i++) {
+            previews[i].setEditing(sameField(focused, previews[i].field));
+        }
+    }
+
+    if (instance.focusedField && typeof instance.focusedField.subscribe === 'function') {
+        state.unsubs.push(instance.focusedField.subscribe(apply));
+        return;
+    }
+
+    // Fallback: infer focus from the DOM. focusin/focusout are composed, so
+    // they surface from inside the fields' shadow roots; activeElement is
+    // retargeted to the shadow host, which sits inside the field element.
+    var timer = null;
+    function check() {
+        timer = null;
+        var active = document.activeElement;
+        for (var i = 0; i < previews.length; i++) {
+            var el = previews[i].element;
+            previews[i].setEditing(!!el && el.contains(active));
+        }
+    }
+    function schedule() {
+        if (timer !== null) clearTimeout(timer);
+        timer = setTimeout(check, 30);
+    }
+    document.addEventListener('focusin', schedule);
+    document.addEventListener('focusout', schedule);
+    state.cleanups.push(function () {
+        document.removeEventListener('focusin', schedule);
+        document.removeEventListener('focusout', schedule);
+        if (timer !== null) clearTimeout(timer);
+    });
+    schedule();
 }
 
 window.MarkNote = {
@@ -220,60 +392,32 @@ window.MarkNote = {
         });
     },
 
-    // opts: { jsBase, cssBase, fieldNames }
+    // opts: { jsBase, cssBase }
     startEditor: function (opts) {
         opts = opts || {};
         this.stopEditor();
         if (opts.jsBase !== undefined) bases.js = opts.jsBase;
         if (opts.cssBase !== undefined) bases.css = opts.cssBase;
 
-        var area = document.createElement('div');
-        area.id = 'markdown-area';
-        area.style.visibility = 'hidden';
-        document.body.appendChild(area);
-
-        var state = { unsubs: [], timer: null, cancelled: false };
+        var state = { unsubs: [], cleanups: [], cancelled: false };
         editorCleanup = function () {
             state.cancelled = true;
             for (var i = 0; i < state.unsubs.length; i++) state.unsubs[i]();
-            if (state.timer !== null) clearTimeout(state.timer);
-            area.remove();
+            for (var j = 0; j < state.cleanups.length; j++) state.cleanups[j]();
         };
 
-        var fields = noteEditorFields();
-        if (!fields) {
+        var instance = noteEditorInstance();
+        if (!instance) {
             console.warn('MarkNote: NoteEditor API unavailable; preview disabled');
             return Promise.resolve();
         }
-        var names = opts.fieldNames || [];
 
-        return loadAll().then(function () {
+        return Promise.all([loadAll(), resolveFields(instance)]).then(function (results) {
+            var fields = results[1] || [];
             if (state.cancelled) return;
             var md = newMarkdownIt();
-            var contents = fields.map(function () { return ''; });
-
-            function rerender() {
-                state.timer = null;
-                var src = '';
-                for (var i = 0; i < contents.length; i++) {
-                    src += '## ' + (names[i] || 'Field ' + (i + 1)) + '\n\n' + contents[i] + '\n\n';
-                }
-                area.innerHTML = render(md, src);
-                area.style.visibility = 'visible';
-            }
-            function schedule() {
-                if (state.timer === null) state.timer = setTimeout(rerender, 50);
-            }
-
-            // Each field's content is a Svelte store; subscribing fires once
-            // immediately and again on every edit (typing, paste, formatting).
-            fields.forEach(function (field, i) {
-                if (!field.editingArea || !field.editingArea.content) return;
-                state.unsubs.push(field.editingArea.content.subscribe(function (value) {
-                    contents[i] = value;
-                    schedule();
-                }));
-            });
+            var previews = fields.map(function (field) { return attachFieldPreview(field, md, state); });
+            trackFocus(instance, previews, state);
         }).catch(function (err) {
             console.error(err);
         });

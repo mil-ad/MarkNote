@@ -1,4 +1,8 @@
-"""Injects the live markdown preview pane into the Anki editor for MarkNote notes."""
+"""Adds the rendered-preview overlay to editor fields of MarkNote notes.
+
+Each field shows the rendered markdown while it is not focused and the raw
+source while it is; the JS side lives in _render.js (startEditor).
+"""
 import json
 
 from .constants import ADDON_PACKAGE, MODEL_NAME
@@ -17,8 +21,8 @@ _JS_BASE = "/_addons/" + ADDON_PACKAGE + "/"
 _CSS_BASE = "/"
 
 
-def _start_js(field_names):
-    opts = {"jsBase": _JS_BASE, "cssBase": _CSS_BASE, "fieldNames": field_names}
+def _start_js():
+    opts = {"jsBase": _JS_BASE, "cssBase": _CSS_BASE}
     return """
 (function() {
     if (!document.getElementById(%(style_id)s)) {
@@ -44,9 +48,7 @@ def _start_js(field_names):
 
 _STOP_JS = """
 (function() {
-    if (window.MarkNote) { MarkNote.stopEditor(); return; }
-    var area = document.getElementById('markdown-area');
-    if (area) area.remove();
+    if (window.MarkNote) MarkNote.stopEditor();
 })();
 """
 
@@ -54,7 +56,6 @@ _STOP_JS = """
 def on_load_note(editor):
     notetype = editor.note.note_type()
     if notetype["name"] in _TARGET_MODELS:
-        field_names = [field["name"] for field in notetype["flds"]]
-        editor.web.eval(_start_js(field_names))
+        editor.web.eval(_start_js())
     else:
         editor.web.eval(_STOP_JS)

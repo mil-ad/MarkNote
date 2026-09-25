@@ -5,6 +5,11 @@ note types on first install, then pushes the current templates + CSS to both
 so changes to HTMLandCSS.py propagate to existing decks. Nothing is written
 when the stored templates already match, so an unchanged addon doesn't touch
 the collection (or create sync traffic) on every launch.
+
+Fields are set to Anki's "Use HTML editor by default" option, so the editor
+shows the raw markdown source in a plain-text (CodeMirror) input rather than
+the rich-text WYSIWYG one. The rendered preview overlay (see editor.py) sits
+on top of that whenever the field isn't focused.
 """
 from anki.consts import MODEL_CLOZE, MODEL_STD
 from aqt import mw
@@ -32,7 +37,9 @@ def _create(name, kind, field_names, qfmt, afmt):
     notetype["type"] = kind
     notetype["css"] = css
     for field_name in field_names:
-        mm.add_field(notetype, mm.new_field(field_name))
+        field = mm.new_field(field_name)
+        field["plainText"] = True
+        mm.add_field(notetype, field)
     template = mm.new_template(name)
     template["qfmt"] = qfmt
     template["afmt"] = afmt
@@ -43,10 +50,13 @@ def _create(name, kind, field_names, qfmt, afmt):
 
 def _push_templates(notetype, qfmt, afmt):
     template = notetype["tmpls"][0]
+    fields_need_plain = [f for f in notetype["flds"] if not f.get("plainText")]
     if (template["qfmt"] == qfmt and template["afmt"] == afmt
-            and notetype["css"] == css):
+            and notetype["css"] == css and not fields_need_plain):
         return
     template["qfmt"] = qfmt
     template["afmt"] = afmt
     notetype["css"] = css
+    for field in fields_need_plain:
+        field["plainText"] = True
     mw.col.models.update_dict(notetype)
