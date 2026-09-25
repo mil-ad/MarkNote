@@ -1,10 +1,20 @@
+"""Names and derived constants shared by the other modules."""
 import hashlib
+import json
 import os
 
 MODEL_NAME = 'MarkNote'
-CONF_NAME = 'MARKNOTE'
+
+# The addon's top-level package, i.e. its folder name under addons21/. Webviews
+# can fetch files exported via setWebExports from /_addons/<ADDON_PACKAGE>/.
+ADDON_PACKAGE = __name__.split('.', 1)[0]
 
 _SRC_DIR = os.path.dirname(os.path.realpath(__file__))
+
+
+def _read_version():
+    with open(os.path.join(_SRC_DIR, 'manifest.json'), encoding='utf-8') as fh:
+        return json.load(fh)['human_version']
 
 
 def _render_filename():
@@ -22,4 +32,13 @@ def _render_filename():
     return '_render-' + digest + '.js'
 
 
+VERSION = _read_version()
 RENDER_FILE = _render_filename()
+
+# Fallback for clients whose media folder lacks RENDER_FILE (e.g. a phone that
+# hasn't synced media yet). Pinned to the release tag for this version, so the
+# fallback is a known build rather than whatever `main` holds at the moment.
+# The Release workflow creates the `v<VERSION>` tag from manifest.json.
+RENDER_CDN_URL = (
+    'https://cdn.jsdelivr.net/gh/mil-ad/MarkNote@v' + VERSION + '/MarkNote/_render.js'
+)

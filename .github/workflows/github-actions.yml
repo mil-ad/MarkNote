@@ -1,39 +1,35 @@
 name: Release MarkNote ankiaddon
+
+# Manual: bump "human_version" in MarkNote/manifest.json, merge, then run this.
+# It tags the commit v<version> and attaches MarkNote.ankiaddon. The tag also
+# pins the CDN fallback for _render.js (see constants.py), so it must exist
+# for the version that ships.
 on:
   workflow_dispatch:
+
+permissions:
+  contents: write
+
 jobs:
-  To-Ankiaddon:
+  release:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout 
-        uses: actions/checkout@v3
-      
-      - name: Create ankiaddon
-        run: |
-          ls
-          cd MarkNote
-          zip -r -q ../MarkNote.zip ./*
-          cd ..
-          mv MarkNote.zip MarkNote.ankiaddon
-          ls
-      
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: release/${{ github.run_number }}
-          release_name: Release V.${{ github.run_number }}
-          draft: false
-          prerelease: false
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Upload ankiaddon
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+      - name: Read version from manifest
+        id: version
+        run: |
+          version=$(python3 -c 'import json; print(json.load(open("MarkNote/manifest.json"))["human_version"])')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Build ankiaddon
+        run: make package
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./MarkNote.ankiaddon
-          asset_name: MarkNote.ankiaddon
-          asset_content_type: application/gzip
+          tag_name: v${{ steps.version.outputs.version }}
+          name: MarkNote v${{ steps.version.outputs.version }}
+          files: MarkNote.ankiaddon
+          fail_on_unmatched_files: true

@@ -3,6 +3,7 @@
 The media folder syncs to AnkiWeb, so card templates work on any client
 (including mobile) without the addon installed there.
 """
+import filecmp
 import os
 import re
 import shutil
@@ -82,8 +83,11 @@ def _prune_old_render(media_dir):
 
 
 def _copy(src, dst):
-    # Always overwrite: addon updates need to push new bundled files into the
-    # media folder. Anki's media sync detects the content change. (The official
-    # add_file/write_data are unsuitable here — they rename on collision, which
-    # would break the fixed filenames the templates reference.)
+    # Overwrite when the content differs so addon updates reach the media
+    # folder; leave identical files alone so their mtime doesn't change and
+    # media sync doesn't re-hash ~70 files on every launch. (The official
+    # add_file/write_data are unsuitable here — they rename on collision,
+    # which would break the fixed filenames the templates reference.)
+    if os.path.isfile(dst) and filecmp.cmp(src, dst, shallow=False):
+        return
     shutil.copyfile(src, dst)

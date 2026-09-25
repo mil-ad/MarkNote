@@ -1,52 +1,60 @@
 """Injects the live markdown preview pane into the Anki editor for MarkNote notes."""
-from .constants import MODEL_NAME
-from .HTMLandCSS import HTMLforEditor
+import json
 
-_EDITOR_STYLE = """
-    var style = document.createElement('style');
-    style.type = 'text/css';
-    style.innerText = `
-        table, th, td {
-            border: 1px solid black;
-            border-collapse: collapse;
-        }
-        .nightMode table, .nightMode th, .nightMode td {
-            border-color: #555;
-        }
-        :not(pre) > code {
-            background-color: rgba(175, 184, 193, 0.25);
-            padding: 0.15em 0.4em;
-            border-radius: 4px;
-            font-size: 0.9em;
-        }
-        .nightMode :not(pre) > code {
-            background-color: rgba(110, 118, 129, 0.4);
-        }
-        pre code {
-            background-color: #eee;
-            border: 1px solid #999;
-            display: block;
-            padding: 20px;
-            overflow: auto;
-        }
-        .nightMode pre code {
-            background-color: #0d1117;
-            border-color: #444;
-        }`;
-    document.head.appendChild(style);
-"""
-
-_REMOVE_PREVIEW = """
-    var area = document.getElementById('markdown-area');
-    if(area) area.remove();
-"""
+from .constants import ADDON_PACKAGE, MODEL_NAME
+from .HTMLandCSS import editor_css
 
 _TARGET_MODELS = {MODEL_NAME + " Basic", MODEL_NAME + " Cloze"}
 
+_STYLE_ID = "marknote-editor-style"
 
-def markdown_preview(editor):
-    if editor.note.model()["name"] in _TARGET_MODELS:
-        editor.web.eval(HTMLforEditor)
-        editor.web.eval(_EDITOR_STYLE)
+# The editor's Content Security Policy only allows scripts from Anki's own
+# paths and /_addons/, so the renderer and its libraries are fetched from the
+# addon folder (exported via setWebExports in __init__.py). Stylesheets aren't
+# restricted, so they come from the media folder, as on cards — that also
+# keeps the KaTeX font URLs (relative to the CSS file) resolving.
+_JS_BASE = "/_addons/" + ADDON_PACKAGE + "/"
+_CSS_BASE = "/"
+
+
+def _start_js(field_names):
+    opts = {"jsBase": _JS_BASE, "cssBase": _CSS_BASE, "fieldNames": field_names}
+    return """
+(function() {
+    if (!document.getElementById(%(style_id)s)) {
+        var style = document.createElement('style');
+        style.id = %(style_id)s;
+        style.textContent = %(css)s;
+        document.head.appendChild(style);
+    }
+    function go() { MarkNote.startEditor(%(opts)s); }
+    if (window.MarkNote) { go(); return; }
+    var s = document.createElement('script');
+    s.src = %(src)s;
+    s.onload = go;
+    document.head.appendChild(s);
+})();
+""" % {
+        "style_id": json.dumps(_STYLE_ID),
+        "css": json.dumps(editor_css),
+        "opts": json.dumps(opts),
+        "src": json.dumps(_JS_BASE + "_render.js"),
+    }
+
+
+_STOP_JS = """
+(function() {
+    if (window.MarkNote) { MarkNote.stopEditor(); return; }
+    var area = document.getElementById('markdown-area');
+    if (area) area.remove();
+})();
+"""
+
+
+def on_load_note(editor):
+    notetype = editor.note.note_type()
+    if notetype["name"] in _TARGET_MODELS:
+        field_names = [field["name"] for field in notetype["flds"]]
+        editor.web.eval(_start_js(field_names))
     else:
-        editor.web.eval(_REMOVE_PREVIEW)
+        editor.web.eval(_STOP_JS)

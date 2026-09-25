@@ -1,64 +1,52 @@
 """Note-type (model) creation and updates.
 
-`ensure_models()` runs on every profile load: creates the Basic + Cloze
-note types on first install, and overwrites templates + CSS on every load
-afterwards so changes to HTMLandCSS.py propagate to existing decks.
+`ensure_models()` runs on every profile open: it creates the Basic + Cloze
+note types on first install, then pushes the current templates + CSS to both
+so changes to HTMLandCSS.py propagate to existing decks. Nothing is written
+when the stored templates already match, so an unchanged addon doesn't touch
+the collection (or create sync traffic) on every launch.
 """
-import anki
+from anki.consts import MODEL_CLOZE, MODEL_STD
 from aqt import mw
 
 from .constants import MODEL_NAME
 from .HTMLandCSS import back, back_cloze, css, front, front_cloze
 
+BASIC_NAME = MODEL_NAME + " Basic"
+CLOZE_NAME = MODEL_NAME + " Cloze"
+
 
 def ensure_models():
-    if not mw.col.models.byName(MODEL_NAME + " Basic"):
-        _create_basic()
-    if not mw.col.models.byName(MODEL_NAME + " Cloze"):
-        _create_cloze()
-    _push_templates()
+    mm = mw.col.models
+    basic = mm.by_name(BASIC_NAME) or _create(
+        BASIC_NAME, MODEL_STD, ("Front", "Back"), front, back)
+    cloze = mm.by_name(CLOZE_NAME) or _create(
+        CLOZE_NAME, MODEL_CLOZE, ("Text", "Back Extra"), front_cloze, back_cloze)
+    _push_templates(basic, front, back)
+    _push_templates(cloze, front_cloze, back_cloze)
 
 
-def _create_basic():
-    m = mw.col.models
-    model = m.new(MODEL_NAME + " Basic")
-    model['css'] = css
-    for field_name in ("Front", "Back"):
-        m.addField(model, m.newField(field_name))
-    template = m.newTemplate(MODEL_NAME + " Basic")
-    template['qfmt'] = front
-    template['afmt'] = back
-    m.addTemplate(model, template)
-    m.add(model)
-    m.save(model)
+def _create(name, kind, field_names, qfmt, afmt):
+    mm = mw.col.models
+    notetype = mm.new(name)
+    notetype["type"] = kind
+    notetype["css"] = css
+    for field_name in field_names:
+        mm.add_field(notetype, mm.new_field(field_name))
+    template = mm.new_template(name)
+    template["qfmt"] = qfmt
+    template["afmt"] = afmt
+    mm.add_template(notetype, template)
+    mm.add(notetype)
+    return mm.by_name(name)
 
 
-def _create_cloze():
-    m = mw.col.models
-    model = m.new(MODEL_NAME + " Cloze")
-    model["type"] = anki.consts.MODEL_CLOZE
-    model['css'] = css
-    for field_name in ("Text", "Back Extra"):
-        m.addField(model, m.newField(field_name))
-    template = m.newTemplate(MODEL_NAME + " Cloze")
-    template['qfmt'] = front_cloze
-    template['afmt'] = back_cloze
-    m.addTemplate(model, template)
-    m.add(model)
-    m.save(model)
-
-
-def _push_templates():
-    basic = mw.col.models.byName(MODEL_NAME + " Basic")
-    cloze = mw.col.models.byName(MODEL_NAME + " Cloze")
-
-    basic['tmpls'][0]['qfmt'] = front
-    basic['tmpls'][0]['afmt'] = back
-    basic['css'] = css
-
-    cloze['tmpls'][0]['qfmt'] = front_cloze
-    cloze['tmpls'][0]['afmt'] = back_cloze
-    cloze['css'] = css
-
-    mw.col.models.save(basic)
-    mw.col.models.save(cloze)
+def _push_templates(notetype, qfmt, afmt):
+    template = notetype["tmpls"][0]
+    if (template["qfmt"] == qfmt and template["afmt"] == afmt
+            and notetype["css"] == css):
+        return
+    template["qfmt"] = qfmt
+    template["afmt"] = afmt
+    notetype["css"] = css
+    mw.col.models.update_dict(notetype)
